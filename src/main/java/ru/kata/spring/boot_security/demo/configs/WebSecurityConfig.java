@@ -1,4 +1,9 @@
+
+// ----------классы с конфигурациями для безопасности-------------;
+
 package ru.kata.spring.boot_security.demo.configs;
+
+//настройка секьюрности по определенным URL, а также настройка UserDetails и GrantedAuthority.
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,13 +28,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/", "/index").permitAll()
-                .anyRequest().authenticated()
+                .antMatchers("/", "/index").permitAll()          //разрешить всем на эти адреса
+                .anyRequest().authenticated()                        //на все остальные - просить аутентиф
                 .and()
-                .formLogin().successHandler(successUserHandler)
+                .formLogin().successHandler(successUserHandler)      // Настройка обработчика успешной аутентификации
                 .permitAll()
                 .and()
-                .logout()
+                .logout()                                            //выход - разрешить всем
                 .permitAll();
     }
 
