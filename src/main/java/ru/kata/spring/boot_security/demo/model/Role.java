@@ -17,7 +17,7 @@ public class Role implements GrantedAuthority {
     private long id;
     private String username;
     private String surname;
-    private String department;
+    private String password;
     private String salary;
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
@@ -27,11 +27,11 @@ public class Role implements GrantedAuthority {
     public Role(Long id) {
         this.id = id;
     }
-    public Role(long id, String name, String surname, String department, String salary) {
+    public Role(long id, String name, String surname, String password, String salary) {
         this.id = id;
         this.username = name;
         this.surname = surname;
-        this.department = department;
+        this.password = password;
         this.salary = salary;
     }
 
@@ -59,12 +59,12 @@ public class Role implements GrantedAuthority {
         this.surname = surname;
     }
 
-    public String getDepartment() {
-        return department;
+    public String getPassword() {
+        return password;
     }
 
-    public void setDepartment(String department) {
-        this.department = department;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getSalary() {

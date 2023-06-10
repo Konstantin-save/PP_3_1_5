@@ -21,8 +21,8 @@ public class User implements UserDetails {
     private String name;
     @Column(name = "surname")
     private String surname;
-    @Column(name = "department")
-    private String department;
+    @Column(name = "password")
+    private String password;
     @Column(name = "salary")
     private String salary;
 
@@ -33,13 +33,12 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(long id, String lastName, String name, String surname, String department, String salary) {
+    public User(long id, String lastName, String name, String surname, String password, String salary) {
         this.id = id;
         this.name = name;
         this.surname = surname;
-        this.department = department;
+        this.password = password;
         this.salary = salary;
-      //  this.role = role;
     }
 
     public long getId() {
@@ -66,12 +65,8 @@ public class User implements UserDetails {
         this.surname = surname;
     }
 
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
+    public void setPassword(String department) {
+        this.password = department;
     }
 
     public String getSalary() {
@@ -95,44 +90,44 @@ public class User implements UserDetails {
                 "id=" + id +
                   ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
-                ", department='" + department + '\'' +
+                ", password='" + password + '\'' +
                 ", salary='" + salary + '\'' +
-               // ", role='" + role + '\'' +
+                ", roles='" + roles + '\'' +
                 '}';
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+    public Collection<? extends GrantedAuthority> getAuthorities() {  //возвращает коллекцию, состоящую из двух разрешений - "ROLE_ADMIN" и "ROLE_USER".
+        return getRoles();
     }
 
     @Override
     public String getPassword() {
-        return null;
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return name;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }
