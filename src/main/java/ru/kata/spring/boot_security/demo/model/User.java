@@ -16,7 +16,7 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)       //генерацией id будет заниматься БД
     @Column(name = "id")
-    private long id;
+    private Long id;
     @Column(name = "name")
     private String name;
     @Column(name = "surname")
@@ -25,20 +25,39 @@ public class User implements UserDetails {
     private String password;
     @Column(name = "salary")
     private String salary;
+    @Column(name = "email",unique = true)
+    private String email;
 
-    @ManyToMany(fetch = FetchType.EAGER)   //жадная загрузка(спис ролей загруж сразу)
+    @ManyToMany
+    @JoinTable(name = "users_roles",
+    joinColumns = @JoinColumn(name = "user_id"),
+    inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
-
 
     public User() {
     }
 
-    public User(long id, String lastName, String name, String surname, String password, String salary) {
+    public User(long id, String name, String surname, String password, String salary,String email) {
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.password = password;
         this.salary = salary;
+        this.email = email;
+    }
+
+    public User(String password, String email, Set<? extends GrantedAuthority> authorities) { //в принципал записываем авторити
+        this.password = password;
+        this.email = email;
+        this.roles = (Set<Role>) authorities;
+    }
+
+    public void addRole(Role role) {
+        this.roles.add(role);
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public long getId() {
@@ -76,6 +95,14 @@ public class User implements UserDetails {
     public void setSalary(String salary) {
         this.salary = salary;
     }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
     public Set<Role> getRoles() {
         return roles;
     }
@@ -97,7 +124,7 @@ public class User implements UserDetails {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {  //возвращает коллекцию, состоящую из двух разрешений - "ROLE_ADMIN" и "ROLE_USER".
+    public Set<? extends GrantedAuthority> getAuthorities() {  //возвращает коллекцию, состоящую из двух разрешений - "ROLE_ADMIN" и "ROLE_USER".
         return getRoles();
     }
 
@@ -108,7 +135,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return name;
+        return email;
     }
 
     @Override

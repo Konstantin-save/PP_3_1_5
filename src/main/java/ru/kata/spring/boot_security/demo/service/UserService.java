@@ -4,24 +4,75 @@
 
 package ru.kata.spring.boot_security.demo.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
+//-----по email пользователя предоставляет самого юзера---
 @Service
 public class UserService implements UserDetailsService {
 
+    private final UserRepository userRepository;      //объявл поля для обращения к методам userRepository
+
+    public UserService(UserRepository userRepository) {  //внедрение зависим. от репозитория для получения инф из Бд
+        this.userRepository = userRepository;
+    }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {  //на входе имя польз, и надо по нему вернуть самого юзера из базы
+        User user = userRepository.findByEmail(username);                       //достаем из БД польз по email
+        if (user == null) {                                      //если нет - ошибка
+            throw new UsernameNotFoundException("User not found with username: " + username);
+        }
+        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), new ArrayList<>()); //возвр нового юзера и кладем в него нашего с данными и в лист
     }
-}
+
+
+       public List<User> getAllUser() {
+        return userRepository.findAll();
+       }
+
+
+    @Transactional
+    public void saveUser(User user) {saveUser(user);              //вызывает метод saveUser из Dao
+    }
+
+
+    @Transactional
+    public User getUser(long id) {
+        return getUser(id);      //возвращает юзера
+    }
+
+
+    @Transactional
+    public void deleteUser(long id) {
+        deleteUser(id);
+
+    }
+
+    @Transactional
+    public void addUser(User user) {
+        addUser(user);
+    }
+
+
+    @Transactional
+    public void removeUser(long id) {deleteUser(id);
+    }
+
+
+    @Transactional
+    public User getUserById(long id) {
+        return getUserById(id);
+    }
+   }
 
 
 

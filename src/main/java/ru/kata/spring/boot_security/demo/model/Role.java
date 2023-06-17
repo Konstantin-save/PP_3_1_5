@@ -2,10 +2,7 @@
 //------------------------классы с моделями--------------------------------
 
 package ru.kata.spring.boot_security.demo.model;
-
-
 import org.springframework.security.core.GrantedAuthority;
-
 import javax.persistence.*;
 import java.util.Set;
 
@@ -15,24 +12,21 @@ public class Role implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String username;
-    private String surname;
-    private String password;
-    private String salary;
-    @ManyToMany(mappedBy = "roles")
-    private Set<User> users;
+    private String name;
 
+    public Role(String name) {
+        this.name = name;
+    }
     public Role() {
     }
-    public Role(Long id) {
+
+    public void setId(long id) {
         this.id = id;
     }
-    public Role(long id, String name, String surname, String password, String salary) {
+
+    public Role(long id, String name) {
         this.id = id;
-        this.username = name;
-        this.surname = surname;
-        this.password = password;
-        this.salary = salary;
+        this.name = name;
     }
 
     public void setId(Long id) {
@@ -43,47 +37,15 @@ public class Role implements GrantedAuthority {
         return id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
-
-    public void setUsername(String name) {
-        this.username = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getSalary() {
-        return salary;
-    }
-
-    public void setSalary(String salary) {
-        this.salary = salary;
-    }
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
     public String getAuthority() {    //переопределяем - (возвращает имя роли)
-        return getUsername();
+        return getName();
     }
 }
