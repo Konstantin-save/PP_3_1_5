@@ -7,7 +7,7 @@ import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 import java.util.List;
 @Service
 public class RoleServiceIMPI implements RoleService { //RoleServiceIMPI предоставляет функциональность для работы с ролями
-private final RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
     public RoleServiceIMPI(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;

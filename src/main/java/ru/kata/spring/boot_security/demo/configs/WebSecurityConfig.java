@@ -1,4 +1,3 @@
-
 // ----------классы с конфигурациями для безопасности-------------;
 
 package ru.kata.spring.boot_security.demo.configs;
@@ -25,6 +24,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final SuccessUserHandler successUserHandler;         //внедрение зависимостей для обработки аутентификации
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
     public WebSecurityConfig(SuccessUserHandler successUserHandler, UserService userService, PasswordEncoder passwordEncoder) {
         this.successUserHandler = successUserHandler;
         this.userService = userService;
@@ -34,10 +35,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .csrf()
+                .disable()
                 .authorizeRequests()
+                .antMatchers("/login").not().fullyAuthenticated()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/user").hasAnyRole("USER", "ADMIN")
-                .antMatchers("/", "/index").permitAll()
+//                .antMatchers("/", "/index").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().successHandler(successUserHandler)
@@ -53,11 +57,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return userService;
     }
 
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();  //создает объект провайдера аутентификации,
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);    // и passwordEncoder для проверки пароля.
-        daoAuthenticationProvider.setUserDetailsService(userService);      //который использует userService для получения деталей пользователя
-       return daoAuthenticationProvider;          // добавляет провайдер аутентификации в конфигурацию аутентификации.
+    @Autowired
+    protected void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userService).passwordEncoder(passwordEncoder);
     }
 }
