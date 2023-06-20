@@ -1,47 +1,41 @@
-// ----------классы с конфигурациями для безопасности-------------;
-
 package ru.kata.spring.boot_security.demo.configs;
 
-//настройка секьюрности по определенным URL, а также настройка UserDetails и GrantedAuthority.
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
-
-
-@EnableWebSecurity                                                        //вкл поддержку безопасности
+@Configuration
+@EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final SuccessUserHandler successUserHandler;         //внедрение зависимостей для обработки аутентификации
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
-
+    private final SuccessUserHandler successUserHandler;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     @Autowired
-    public WebSecurityConfig(SuccessUserHandler successUserHandler, UserService userService, PasswordEncoder passwordEncoder) {
-        this.successUserHandler = successUserHandler;
+    public WebSecurityConfig(UserService userService, SuccessUserHandler successUserHandler, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
+        this.successUserHandler = successUserHandler;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf()
-                .disable()
                 .authorizeRequests()
-                .antMatchers("/login").not().fullyAuthenticated()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/user").hasAnyRole("USER", "ADMIN")
-//                .antMatchers("/", "/index").permitAll()
+                .antMatchers(HttpMethod.PATCH, "/admin/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.POST, "/admin/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.PUT, "/admin/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/admin/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.GET, "/admin/**").hasRole("USER")
+                .antMatchers("/", "/index").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().successHandler(successUserHandler)
@@ -51,14 +45,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll();
     }
 
-    @Bean
-    @Override
-    public UserDetailsService userDetailsService() {
-        return userService;
-    }
 
     @Autowired
     protected void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userService).passwordEncoder(passwordEncoder);
+        auth.userDetailsService(userService).passwordEncoder(bCryptPasswordEncoder);
     }
+
 }

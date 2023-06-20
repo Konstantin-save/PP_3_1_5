@@ -1,7 +1,5 @@
-
-//-----------------классы c сервисами для моделей-----------------
-
 package ru.kata.spring.boot_security.demo.service;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,56 +9,84 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
-import java.util.*;
 
-//-----по email пользователя предоставляет самого юзера---
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class UserService implements UserDetailsService {
 
-    private final UserRepository userRepository;      //объявл поля для обращения к методам userRepository
-    private final PasswordEncoder passwordEncoder;      //объявл поля для обращения к методам passwordEncoder
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {  //внедрение зависим. от репозитория для получения инф из Бд
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
+
+
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {  //на входе имя польз, и надо по нему вернуть самого юзера из базы
-        User user = userRepository.findByEmail(username);                       //достаем из БД польз по email
-        if (user == null) {                                      //если нет - ошибка
-            throw new UsernameNotFoundException("User not found with username: " + username);
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
         }
-        return user; //возвр нового юзера и кладем в него нашего с данными и в лист
+
+        return user;
     }
-    public List<User> getAllUser() {
+
+    @Transactional(readOnly = true)
+    public User findUserById(Long userId) {
+        Optional<User> userFromDb = userRepository.findById(userId);
+        return userFromDb.orElse(new User());
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> allUsers() {
         return userRepository.findAll();
     }
+
     @Transactional
     public void saveUser(User user) {
-        User userFromDB = userRepository.findByEmail(user.getUsername());
-        user.setRoles(Collections.singleton(new Role(2L, "ROLE_USER")));
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        User userFromDB = userRepository.findByUsername(user.getUsername());
+
+        user.setRoles(user.getRoles());
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
+
     @Transactional
-    public void updateUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(Collections.singleton(new Role(2L, "ROLE_USER")));
+    public boolean updateUser(User user) {
+        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+        return true;
     }
+
     @Transactional
-    public User getUser(String email) {
-        return userRepository.findByEmail(email);      //возвращает юзера
+    public boolean deleteUser(Long userId) {
+        userRepository.deleteById(userId);
+        return true;
     }
-    @Transactional
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+
+    @Transactional(readOnly = true)
+    public List<Role> listRoles() {
+        return roleRepository.findAll();
     }
-    @Transactional
-    public User getUserById(Long id) {
-        Optional<User> userFromDb = userRepository.findById(id);
-        return userFromDb.orElseThrow(RuntimeException::new);
+
+    @Transactional(readOnly = true)
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserByUsername(String name) {
+        return userRepository.findByUsername(name);
     }
 }

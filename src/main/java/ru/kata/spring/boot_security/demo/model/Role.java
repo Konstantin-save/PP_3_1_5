@@ -1,6 +1,3 @@
-
-//------------------------классы с моделями--------------------------------
-
 package ru.kata.spring.boot_security.demo.model;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -14,13 +11,14 @@ public class Role implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
+    public Role() {
+    }
 
     public Role(String name) {
         this.name = name;
-    }
-
-    public Role() {
     }
 
     public Role(Long id, String name) {
@@ -28,12 +26,17 @@ public class Role implements GrantedAuthority {
         this.name = name;
     }
 
-    public void setId(Long id) {
+    public Role(Long id) {
         this.id = id;
     }
 
     public Long getId() {
         return id;
+    }
+
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -45,7 +48,7 @@ public class Role implements GrantedAuthority {
     }
 
     @Override
-    public String getAuthority() {    //переопределяем - (возвращает имя роли)
+    public String getAuthority() {
         return getName();
     }
 
@@ -54,7 +57,7 @@ public class Role implements GrantedAuthority {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Role role = (Role) o;
-        return id == role.id && Objects.equals(name, role.name);
+        return Objects.equals(id, role.id) && Objects.equals(name, role.name);
     }
 
     @Override
@@ -64,8 +67,6 @@ public class Role implements GrantedAuthority {
 
     @Override
     public String toString() {
-        return "Role{" +
-                "name='" + name + '\'' +
-                '}';
+        return name;
     }
 }
