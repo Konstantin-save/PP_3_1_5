@@ -16,6 +16,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserService userService;
     private final SuccessUserHandler successUserHandler;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
     @Autowired
     public WebSecurityConfig(UserService userService, SuccessUserHandler successUserHandler, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userService = userService;
@@ -27,8 +28,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
                 .antMatchers("/user").hasAnyRole("USER", "ADMIN")
                 .antMatchers(HttpMethod.PATCH, "/admin/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/admin/**").hasRole("ADMIN")
@@ -36,6 +38,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.DELETE, "/admin/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.GET, "/admin/**").hasRole("USER")
                 .antMatchers("/", "/index").permitAll()
+//                .antMatchers("/api/admin/**").permitAll() // Тесты ПОСТМАН
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().successHandler(successUserHandler)
@@ -43,6 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .logout()
                 .permitAll();
+
     }
 
 
